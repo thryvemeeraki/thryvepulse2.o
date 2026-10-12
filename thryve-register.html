@@ -361,7 +361,7 @@ async function handleRegister(){
   setLoading(true, 'Preparing your secure ₹99 payment…');
 
   try {
-    var order = await postJson('/.netlify/functions/create-order', {
+    var order = await postJson('https://thryvepulse2.netlify.app/.netlify/functions/create-order', {
       name:name, email:email, phone:phone, category:category
     });
     setLoading(false);
@@ -379,7 +379,7 @@ async function handleRegister(){
       handler: async function(paymentResponse){
         setLoading(true, 'Verifying your payment and preparing your assessment link…');
         try {
-          var verified = await postJson('/.netlify/functions/verify-payment', {
+          var verified = await postJson('https://thryvepulse2.netlify.app/.netlify/functions/verify-payment', {
             razorpay_payment_id: paymentResponse.razorpay_payment_id,
             razorpay_order_id: paymentResponse.razorpay_order_id,
             razorpay_signature: paymentResponse.razorpay_signature
@@ -426,7 +426,7 @@ async function handleCashCoupon(){
   setBusy(true);
   setLoading(true, 'Verifying your cash coupon and preparing your assessment link…');
   try {
-    var result = await postJson('/.netlify/functions/redeem-coupon', {
+    var result = await postJson('https://thryvepulse2.netlify.app/.netlify/functions/redeem-coupon', {
       name:details.name, email:details.email, phone:details.phone,
       category:details.category, couponCode:couponCode
     });

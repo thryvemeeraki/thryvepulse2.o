@@ -1,15 +1,2 @@
-const { json, parseBody, readToken } = require('./_shared');
-
-exports.handler = async (event) => {
-  if (event.httpMethod !== 'POST') return json(405, { error: 'Method not allowed.' });
-  try {
-    const { token } = parseBody(event);
-    const result = readToken(token);
-    if (result.expired) return json(410, { valid: false, expired: true });
-    if (!result.valid) return json(401, { valid: false });
-    return json(200, { valid: true, user: result.user });
-  } catch (err) {
-    console.error('verify-access error:', err && err.message);
-    return json(500, { valid: false, error: 'Could not verify access.' });
-  }
-};
+const {json,parseBody,verifyToken}=require('./_shared');
+exports.handler=async function(event){if(event.httpMethod==='OPTIONS')return json(204,{});if(event.httpMethod!=='POST')return json(405,{error:'Use POST to verify access.'});const r=verifyToken(parseBody(event).token);if(r.configError)return json(500,{valid:false,error:'Assessment verification is not configured.'});if(!r.valid)return json(r.expired?410:401,{valid:false,expired:!!r.expired});return json(200,{valid:true,user:r.user});};

@@ -1,70 +1,11 @@
 const crypto = require('crypto');
-
-const PRICE_PAISE = 9900;
-const CURRENCY = 'INR';
-
-function json(statusCode, body) {
-  return {
-    statusCode,
-    headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' },
-    body: JSON.stringify(body)
-  };
-}
-function requiredEnv(name) {
-  const value = process.env[name];
-  if (!value) throw new Error('Server configuration is incomplete. Please contact support.');
-  return value;
-}
-function parseBody(event) {
-  try { return JSON.parse(event.body || '{}'); }
-  catch (_) { return {}; }
-}
-function authHeader() {
-  const id = requiredEnv('RAZORPAY_KEY_ID');
-  const secret = requiredEnv('RAZORPAY_KEY_SECRET');
-  return 'Basic ' + Buffer.from(id + ':' + secret).toString('base64');
-}
-async function razorpay(path, options = {}) {
-  const response = await fetch('https://api.razorpay.com/v1' + path, {
-    ...options,
-    headers: {
-      Authorization: authHeader(),
-      'Content-Type': 'application/json',
-      ...(options.headers || {})
-    }
-  });
-  const data = await response.json().catch(() => ({}));
-  if (!response.ok) {
-    const err = new Error((data.error && data.error.description) || 'Payment provider request failed.');
-    err.status = response.status;
-    throw err;
-  }
-  return data;
-}
-function makeToken(user) {
-  const secret = requiredEnv('THRYVE_TOKEN_SECRET');
-  const encoded = Buffer.from(JSON.stringify(user), 'utf8').toString('base64url');
-  const signature = crypto.createHmac('sha256', secret).update(encoded).digest('base64url');
-  return encoded + '.' + signature;
-}
-function readToken(token) {
-  if (typeof token !== 'string' || token.length > 4096) return { valid: false };
-  const parts = token.split('.');
-  if (parts.length !== 2) return { valid: false };
-  const [encoded, signature] = parts;
-  const expected = crypto.createHmac('sha256', requiredEnv('THRYVE_TOKEN_SECRET')).update(encoded).digest();
-  let supplied;
-  try { supplied = Buffer.from(signature, 'base64url'); } catch (_) { return { valid: false }; }
-  if (supplied.length !== expected.length || !crypto.timingSafeEqual(supplied, expected)) return { valid: false };
-  let payload;
-  try { payload = JSON.parse(Buffer.from(encoded, 'base64url').toString('utf8')); } catch (_) { return { valid: false }; }
-  if (!payload || !payload.exp || !(payload.paymentId || payload.couponCode) || !payload.email || !['teen','adult'].includes(payload.cat)) return { valid: false };
-  if (Date.now() >= payload.exp) return { valid: false, expired: true };
-  return { valid: true, user: payload };
-}
-function safeError(err) {
-  // Do not return secrets or raw provider payloads to the browser.
-  if (err && err.status === 400) return 'The payment could not be confirmed. If money was deducted, please contact support before trying again.';
-  return 'We could not complete the request. Please try again, or contact support if money was deducted.';
-}
-module.exports = { PRICE_PAISE, CURRENCY, json, requiredEnv, parseBody, razorpay, makeToken, readToken, safeError };
+const ASSESSMENT_URL = 'https://thryvemeeraki.github.io/thryvepulse2.o/thryve-assessment.html';
+const AMOUNT_PAISE = 9900;
+function json(statusCode, body) { return { statusCode, headers: { 'Content-Type':'application/json; charset=utf-8', 'Cache-Control':'no-store', 'Access-Control-Allow-Origin':'*', 'Access-Control-Allow-Headers':'Content-Type', 'Access-Control-Allow-Methods':'POST, OPTIONS' }, body:JSON.stringify(body) }; }
+function parseBody(event) { try { return JSON.parse(event.body || '{}'); } catch (_) { return {}; } }
+function requireEnv(name) { const value=process.env[name]; if (!value || !String(value).trim()) { console.error('Missing required environment variable:', name); throw new Error('Server configuration is incomplete (missing '+name+').'); } return String(value).trim(); }
+function createToken(user) { const secret=requireEnv('THRYVE_TOKEN_SECRET'); const payload=Buffer.from(JSON.stringify(user)).toString('base64url'); const sig=crypto.createHmac('sha256',secret).update(payload).digest('base64url'); return payload+'.'+sig; }
+function verifyToken(token) { if(typeof token!=='string'||token.length>5000)return {valid:false}; const p=token.split('.'); if(p.length!==2)return {valid:false}; let secret; try{secret=requireEnv('THRYVE_TOKEN_SECRET')}catch(_){return {valid:false,configError:true}} const expected=crypto.createHmac('sha256',secret).update(p[0]).digest(); let actual; try{actual=Buffer.from(p[1],'base64url')}catch(_){return {valid:false}} if(actual.length!==expected.length||!crypto.timingSafeEqual(actual,expected))return {valid:false}; let user; try{user=JSON.parse(Buffer.from(p[0],'base64url').toString('utf8'))}catch(_){return {valid:false}} if(!user||!user.exp||Date.now()>Number(user.exp))return {valid:false,expired:true}; if(!user.name||!user.email||!['teen','adult'].includes(user.cat))return {valid:false}; return {valid:true,user}; }
+function makeAssessmentLink(d) { const user={name:String(d.name||'').trim(),email:String(d.email||'').trim().toLowerCase(),phone:String(d.phone||'').trim(),cat:String(d.category||''),exp:Date.now()+3600000}; if(!user.name||!/^\S+@\S+\.\S+$/.test(user.email)||!user.phone||!['teen','adult'].includes(user.cat))throw new Error('Please provide valid name, email, phone number, and age category.'); const token=createToken(user); return {user,token,link:ASSESSMENT_URL+'?token='+encodeURIComponent(token),expTime:new Date(user.exp).toLocaleString('en-IN',{timeZone:'Asia/Kolkata'})}; }
+async function callAppsScript(payload) { const url=requireEnv('APPS_SCRIPT_URL'); const body=new URLSearchParams({payload:JSON.stringify(payload)}).toString(); const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'},body,redirect:'follow'}); const t=await r.text(); if(!r.ok){console.error('Apps Script HTTP',r.status,t.slice(0,500));throw new Error('Could not save registration to Google Sheets. Check Apps Script deployment and logs.')} return t; }
+module.exports={json,parseBody,requireEnv,createToken,verifyToken,makeAssessmentLink,callAppsScript,AMOUNT_PAISE};
