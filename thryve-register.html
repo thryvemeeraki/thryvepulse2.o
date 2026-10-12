@@ -232,8 +232,20 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
 
       <div class="brow">
         <button class="btn bp" id="submitBtn" onclick="handleRegister()">
-          Send Me My Link →
+          Pay ₹99 &amp; Get My Link →
         </button>
+      </div>
+
+      <div style="margin:24px 0 8px;display:flex;align-items:center;gap:12px;color:var(--muted);font-size:12px;">
+        <span style="height:1px;background:var(--border);flex:1;"></span><span>OR</span><span style="height:1px;background:var(--border);flex:1;"></span>
+      </div>
+      <div class="fg" style="margin-bottom:10px;">
+        <label for="cashCoupon">Paid by cash? Enter your coupon code</label>
+        <input class="fc" id="cashCoupon" type="text" placeholder="e.g. TP-CASH-A1B2C3D4E5F6" autocomplete="off" autocapitalize="characters"/>
+        <p style="font-size:12px;color:var(--muted);margin:8px 0 0;line-height:1.5;">Use the unique code provided by the Thryve Pulse team after your cash payment.</p>
+      </div>
+      <div class="brow">
+        <button class="btn bo" id="couponBtn" type="button" onclick="handleCashCoupon()">Redeem Cash Coupon →</button>
       </div>
     </div>
   </div>
@@ -281,8 +293,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script>
 // Thryve Pulse paid registration — ₹99. Razorpay secrets remain on Netlify.
-var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxQ4QnyeIIHly1rQqmr0zV8OOs7B9d95QypBOsPHHt77Wbw3QvBq-v1ZDyRO7RhLJI9og/exec';
-var ASSESS_URL = 'https://thryvemeeraki.github.io/thryvepulse2.o/thryve-assessment.html';
+var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxXU5hnn9pBB9OqMDwZc9PhkytMkavsXJ49bCmZ1TH1sj3KGnszX7W14mVijMPJmCcm/exec';
+var ASSESS_URL = 'https://thryvepulse2.netlify.app/thryve-assessment.html';
 var PRICE_LABEL = '₹99';
 
 function showS(id){
@@ -316,7 +328,21 @@ function postJson(path, data){
 }
 function setBusy(busy){
   var btn = document.getElementById('submitBtn');
+  var couponBtn = document.getElementById('couponBtn');
   if(btn) btn.disabled = busy;
+  if(couponBtn) couponBtn.disabled = busy;
+}
+function getRegistrationDetails(){
+  var name = document.getElementById('rname').value.trim();
+  var email = document.getElementById('remail').value.trim();
+  var phone = document.getElementById('rphone').value.trim();
+  var ageEl = document.querySelector('input[name="ac"]:checked');
+  if(!name) { showErr('Please enter your full name.'); return null; }
+  if(!email) { showErr('Please enter your email address.'); return null; }
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showErr('Please enter a valid email address.'); return null; }
+  if(!phone) { showErr('Please enter your contact number.'); return null; }
+  if(!ageEl) { showErr('Please select your age category.'); return null; }
+  return {name:name, email:email, phone:phone, category:ageEl.value};
 }
 function showPaidSuccess(email){
   setLoading(false);
@@ -325,20 +351,12 @@ function showPaidSuccess(email){
 }
 
 async function handleRegister(){
-  var name  = document.getElementById('rname').value.trim();
-  var email = document.getElementById('remail').value.trim();
-  var phone = document.getElementById('rphone').value.trim();
-  var ageEl = document.querySelector('input[name="ac"]:checked');
   hideErr();
-
-  if(!name)  { showErr('Please enter your full name.'); return; }
-  if(!email) { showErr('Please enter your email address.'); return; }
-  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ showErr('Please enter a valid email address.'); return; }
-  if(!phone) { showErr('Please enter your contact number.'); return; }
-  if(!ageEl) { showErr('Please select your age category.'); return; }
+  var details = getRegistrationDetails();
+  if(!details) return;
+  var name = details.name, email = details.email, phone = details.phone, category = details.category;
   if(!window.Razorpay){ showErr('Secure payment could not load. Please refresh the page and try again.'); return; }
 
-  var category = ageEl.value;
   setBusy(true);
   setLoading(true, 'Preparing your secure ₹99 payment…');
 
@@ -398,8 +416,30 @@ async function handleRegister(){
   }
 }
 
+async function handleCashCoupon(){
+  hideErr();
+  var details = getRegistrationDetails();
+  if(!details) return;
+  var codeEl = document.getElementById('cashCoupon');
+  var couponCode = String(codeEl.value || '').trim().toUpperCase();
+  if(!couponCode){ showErr('Please enter the cash coupon code provided to you.'); return; }
+  setBusy(true);
+  setLoading(true, 'Verifying your cash coupon and preparing your assessment link…');
+  try {
+    var result = await postJson('/.netlify/functions/redeem-coupon', {
+      name:details.name, email:details.email, phone:details.phone,
+      category:details.category, couponCode:couponCode
+    });
+    showPaidSuccess(result.email || details.email);
+  } catch(err) {
+    setLoading(false);
+    setBusy(false);
+    showErr(err.message || 'We could not redeem this coupon. Please check the code or contact Thryve Pulse support.');
+  }
+}
+
 function resetForm(){
-  ['rname','remail','rphone'].forEach(function(id){
+  ['rname','remail','rphone','cashCoupon'].forEach(function(id){
     document.getElementById(id).value = '';
   });
   document.querySelectorAll('input[name="ac"]').forEach(function(r){ r.checked = false; });

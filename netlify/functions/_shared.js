@@ -12,14 +12,7 @@ function json(statusCode, body) {
 }
 function requiredEnv(name) {
   const value = process.env[name];
-
-  if (!value || !value.trim()) {
-    console.error(`Missing required environment variable: ${name}`);
-    throw new Error(
-      'Server configuration is incomplete. Please contact support.'
-    );
-  }
-
+  if (!value) throw new Error('Server configuration is incomplete. Please contact support.');
   return value;
 }
 function parseBody(event) {
@@ -65,7 +58,7 @@ function readToken(token) {
   if (supplied.length !== expected.length || !crypto.timingSafeEqual(supplied, expected)) return { valid: false };
   let payload;
   try { payload = JSON.parse(Buffer.from(encoded, 'base64url').toString('utf8')); } catch (_) { return { valid: false }; }
-  if (!payload || !payload.exp || !payload.paymentId || !payload.email || !['teen','adult'].includes(payload.cat)) return { valid: false };
+  if (!payload || !payload.exp || !(payload.paymentId || payload.couponCode) || !payload.email || !['teen','adult'].includes(payload.cat)) return { valid: false };
   if (Date.now() >= payload.exp) return { valid: false, expired: true };
   return { valid: true, user: payload };
 }

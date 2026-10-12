@@ -85,6 +85,8 @@ exports.handler = async (event) => {
       category: catLabel,
       link, expTime,
       paymentStatus: 'Paid',
+      paymentMethod: 'Razorpay',
+      couponCode: '',
       razorpayOrderId: orderId,
       razorpayPaymentId: paymentId,
       amountInr: 99
