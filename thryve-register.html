@@ -295,6 +295,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
 // Thryve Pulse paid registration — ₹99. Razorpay secrets remain on Netlify.
 var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxXU5hnn9pBB9OqMDwZc9PhkytMkavsXJ49bCmZ1TH1sj3KGnszX7W14mVijMPJmCcm/exec';
 var ASSESS_URL = 'https://thryvepulse02.netlify.app/thryve-assessment.html';
+  // Generate the unique assessment link for each registered user
+var link = ASSESS_URL + '?token=' + encodeURIComponent(token);
 var PRICE_LABEL = '₹99';
 
 function showS(id){
