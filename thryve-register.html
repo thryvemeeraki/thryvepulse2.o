@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Thryve Pulse – Register</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --cream:#FAF7F2;--deep:#1A1A2E;--green:#2D6A4F;
+  --gl:#52B788;--gold:#D4A853;--rose:#C77B5A;
+  --text:#2C2C2C;--muted:#7A7A8A;--card:#FFF;--border:#E8E4DC;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);min-height:100vh;}
+
+/* ── HERO ── */
+.hero{
+  background:var(--deep);padding:56px 24px 44px;
+  text-align:center;position:relative;overflow:hidden;
+}
+.hero::before{
+  content:'';position:absolute;inset:0;
+  background:
+    radial-gradient(ellipse at 30% 50%,rgba(82,183,136,.18) 0%,transparent 60%),
+    radial-gradient(ellipse at 70% 20%,rgba(212,168,83,.12) 0%,transparent 55%);
+}
+.badge{
+  display:inline-block;background:rgba(82,183,136,.2);
+  border:1px solid rgba(82,183,136,.5);color:var(--gl);
+  font-size:11px;font-weight:600;letter-spacing:3px;text-transform:uppercase;
+  padding:6px 18px;border-radius:50px;margin-bottom:18px;position:relative;
+}
+.hero h1{
+  font-family:'Playfair Display',serif;
+  font-size:clamp(34px,5vw,60px);font-weight:900;
+  color:#fff;line-height:1.1;position:relative;margin-bottom:12px;
+}
+.hero h1 span{color:var(--gold);}
+.hero p{
+  font-size:15px;color:rgba(255,255,255,.6);
+  max-width:480px;margin:0 auto;line-height:1.7;position:relative;
+}
+.icons{
+  display:flex;justify-content:center;gap:16px;
+  margin-top:28px;position:relative;
+}
+.ic{
+  background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);
+  width:48px;height:48px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-size:22px;
+}
+
+/* ── LAYOUT ── */
+.wrap{max-width:580px;margin:0 auto;padding:0 20px 80px;}
+.screen{display:none;animation:fu .4s ease;}
+.screen.active{display:block;}
+@keyframes fu{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── FORM CARD ── */
+.stitle{
+  font-family:'Playfair Display',serif;font-size:26px;font-weight:700;
+  color:var(--deep);margin-bottom:6px;margin-top:38px;
+}
+.ssub{font-size:14px;color:var(--muted);margin-bottom:26px;line-height:1.6;}
+.card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:20px;padding:34px 30px;
+  box-shadow:0 2px 20px rgba(0,0,0,.05);
+}
+.fg{margin-bottom:20px;}
+.fg label{display:block;font-size:13px;font-weight:600;color:var(--text);margin-bottom:7px;}
+.fg label span{color:var(--rose);}
+.fc{
+  width:100%;padding:13px 16px;border:1.5px solid var(--border);
+  border-radius:12px;font-family:'DM Sans',sans-serif;font-size:15px;
+  color:var(--text);background:#FAFAF8;outline:none;
+  transition:border-color .2s,box-shadow .2s;
+}
+.fc:focus{border-color:var(--gl);box-shadow:0 0 0 3px rgba(82,183,136,.15);background:#fff;}
+
+/* ── AGE CARDS ── */
+.age-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;}
+.ar{display:none;}
+.ar+label{
+  display:flex;flex-direction:column;align-items:center;gap:8px;
+  padding:20px 14px;border:2px solid var(--border);border-radius:16px;
+  cursor:pointer;transition:all .25s;background:#FAFAF8;text-align:center;
+}
+.ar+label .ai{font-size:30px;}
+.ar+label .al{font-weight:600;font-size:14px;color:var(--deep);}
+.ar+label .ad{font-size:11px;color:var(--muted);}
+.ar:checked+label{
+  border-color:var(--gl);background:rgba(82,183,136,.06);
+  box-shadow:0 0 0 3px rgba(82,183,136,.15);
+}
+
+/* ── BUTTON ── */
+.brow{display:flex;justify-content:flex-end;margin-top:24px;}
+.btn{
+  padding:14px 36px;border-radius:50px;border:none;cursor:pointer;
+  font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;
+  transition:all .22s;display:flex;align-items:center;gap:8px;
+}
+.bp{background:var(--deep);color:#fff;box-shadow:0 4px 20px rgba(26,26,46,.25);}
+.bp:hover{background:var(--green);transform:translateY(-2px);}
+.bp:disabled{opacity:.5;cursor:not-allowed;transform:none !important;}
+
+/* ── ERROR ── */
+.err{
+  background:#FFF0ED;border:1px solid #F4C5B5;color:var(--rose);
+  border-radius:10px;padding:12px 16px;font-size:13px;
+  margin-top:14px;display:none;
+}
+.err.show{display:block;}
+
+/* ── SUCCESS ── */
+.success-box{text-align:center;padding:50px 10px;margin-top:20px;}
+.success-box .si{font-size:64px;display:block;margin-bottom:20px;animation:pop .5s ease;}
+@keyframes pop{0%{transform:scale(.5)}70%{transform:scale(1.1)}100%{transform:scale(1)}}
+.success-box h2{font-family:'Playfair Display',serif;font-size:26px;color:var(--deep);margin-bottom:10px;}
+.success-box p{font-size:15px;color:var(--muted);line-height:1.7;max-width:400px;margin:0 auto;}
+.etag{
+  display:inline-block;margin-top:14px;
+  background:rgba(82,183,136,.12);border:1px solid rgba(82,183,136,.3);
+  color:var(--green);font-weight:600;font-size:15px;
+  padding:8px 22px;border-radius:50px;
+}
+.tpill{
+  display:inline-flex;align-items:center;gap:6px;
+  background:rgba(212,168,83,.15);border:1px solid rgba(212,168,83,.4);
+  color:#9A7020;font-size:13px;font-weight:600;
+  padding:6px 16px;border-radius:50px;margin-top:16px;
+}
+.dot{
+  width:7px;height:7px;border-radius:50%;
+  background:var(--gold);animation:pulse 1.2s infinite;
+}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.steps-card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:16px;padding:24px 22px;margin-top:28px;text-align:left;
+}
+.step-item{display:flex;align-items:flex-start;gap:14px;margin-bottom:16px;}
+.step-item:last-child{margin-bottom:0;}
+.step-num{
+  background:var(--deep);color:#fff;width:28px;height:28px;min-width:28px;
+  border-radius:50%;display:flex;align-items:center;
+  justify-content:center;font-size:12px;font-weight:700;
+}
+.step-txt{font-size:14px;color:var(--text);line-height:1.5;}
+.step-txt strong{display:block;margin-bottom:2px;}
+
+/* ── LOADING OVERLAY ── */
+.lov{
+  display:none;position:fixed;inset:0;
+  background:rgba(26,26,46,.72);z-index:9999;
+  align-items:center;justify-content:center;flex-direction:column;gap:16px;
+}
+.lov.show{display:flex;}
+.sp{
+  width:50px;height:50px;border:4px solid rgba(255,255,255,.2);
+  border-top-color:var(--gl);border-radius:50%;animation:spin .8s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.lt{color:#fff;font-size:15px;font-weight:500;text-align:center;max-width:280px;line-height:1.6;}
+
+@media(max-width:500px){.card{padding:22px 16px;}}
+</style>
+</head>
+<body>
+
+<!-- Hero -->
+<div class="hero">
+  <div class="badge">✦ Thryve Pulse Assessment</div>
+  <h1>Discover Your<br/><span>True Self</span></h1>
+  <p>18 scenario-based questions that reveal how you think, lead, and connect with the world.</p>
+  <div class="icons">
+    <div class="ic">🚀</div>
+    <div class="ic">🌿</div>
+    <div class="ic">🧠</div>
+    <div class="ic">❤️</div>
+  </div>
+</div>
+
+<!-- Loading Overlay -->
+<div class="lov" id="lov">
+  <div class="sp"></div>
+  <p class="lt" id="lt">Sending your assessment link…</p>
+</div>
+
+<div class="wrap">
+
+  <!-- SCREEN 1 — Registration Form -->
+  <div class="screen active" id="s-reg">
+    <p class="stitle">Register to Begin</p>
+    <p class="ssub">Fill in your details. A secure personal assessment link will be sent directly to your email — valid for <strong>1 hour</strong>.</p>
+
+    <div class="card">
+      <div class="fg">
+        <label>Full Name <span>*</span></label>
+        <input class="fc" id="rname" type="text" placeholder="e.g. Priya Sharma" autocomplete="name"/>
+      </div>
+      <div class="fg">
+        <label>Email Address <span>*</span></label>
+        <input class="fc" id="remail" type="email" placeholder="you@example.com" autocomplete="email"/>
+      </div>
+      <div class="fg">
+        <label>Contact Number <span>*</span></label>
+        <input class="fc" id="rphone" type="tel" placeholder="+91 98765 43210" autocomplete="tel"/>
+      </div>
+
+      <div class="fg" style="margin-bottom:4px;">
+        <label>Age Category <span>*</span></label>
+        <div class="age-grid">
+          <input type="radio" name="ac" id="ac-teen" value="teen" class="ar"/>
+          <label for="ac-teen">
+            <span class="ai">🌱</span>
+            <span class="al">Below 18</span>
+            <span class="ad">Teen Version</span>
+          </label>
+          <input type="radio" name="ac" id="ac-adult" value="adult" class="ar"/>
+          <label for="ac-adult">
+            <span class="ai">🌿</span>
+            <span class="al">18 &amp; Above</span>
+            <span class="ad">Adult Version</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="err" id="reg-err"></div>
+
+      <div class="brow">
+        <button class="btn bp" id="submitBtn" onclick="handleRegister()">
+          Send Me My Link →
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCREEN 2 — Success -->
+  <div class="screen" id="s-success">
+    <div class="success-box">
+      <span class="si">📬</span>
+      <h2>Check Your Inbox!</h2>
+      <p>Your personal Thryve Pulse assessment link has been sent to:</p>
+      <div class="etag" id="etag"></div><br/>
+      <div class="tpill">
+        <span class="dot"></span>
+        <span>Link valid for <strong>&nbsp;1 hour only</strong></span>
+      </div>
+
+      <div class="steps-card">
+        <div class="step-item">
+          <div class="step-num">1</div>
+          <div class="step-txt"><strong>Open your email inbox</strong>Look for an email from Thryve Pulse</div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">2</div>
+          <div class="step-txt"><strong>Click "Begin My Assessment"</strong>Opens your personal Thryve Pulse form</div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">3</div>
+          <div class="step-txt"><strong>Answer 18 questions</strong>Choose what feels most natural — no right or wrong</div>
+        </div>
+        <div class="step-item">
+          <div class="step-num">4</div>
+          <div class="step-txt"><strong>Get your results instantly</strong>Your personal archetype revealed on screen</div>
+        </div>
+      </div>
+
+      <p style="margin-top:20px;font-size:13px;color:var(--muted);">
+        Didn't receive the email? Check spam or
+        <a href="#" onclick="resetForm();return false;" style="color:var(--green);font-weight:600;">register again</a>.
+      </p>
+    </div>
+  </div>
+
+</div><!-- /.wrap -->
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+// Thryve Pulse paid registration — ₹99. Razorpay secrets remain on Netlify.
+var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxQ4QnyeIIHly1rQqmr0zV8OOs7B9d95QypBOsPHHt77Wbw3QvBq-v1ZDyRO7RhLJI9og/exec';
+var ASSESS_URL = 'https://thryvepulse2.netlify.app/thryve-assessment.html';
+var PRICE_LABEL = '₹99';
+
+function showS(id){
+  document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
+  document.getElementById(id).classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function setLoading(show, msg){
+  if(msg) document.getElementById('lt').textContent = msg;
+  document.getElementById('lov').classList.toggle('show', show);
+}
+function showErr(msg){
+  var el = document.getElementById('reg-err');
+  el.textContent = msg;
+  el.classList.add('show');
+}
+function hideErr(){
+  document.getElementById('reg-err').classList.remove('show');
+}
+function postJson(path, data){
+  return fetch(path, {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify(data)
+  }).then(function(r){
+    return r.json().catch(function(){ return {}; }).then(function(body){
+      if(!r.ok || body.error) throw new Error(body.error || 'Request failed. Please try again.');
+      return body;
+    });
+  });
+}
+function setBusy(busy){
+  var btn = document.getElementById('submitBtn');
+  if(btn) btn.disabled = busy;
+}
+function showPaidSuccess(email){
+  setLoading(false);
+  document.getElementById('etag').textContent = email;
+  showS('s-success');
+}
+
+async function handleRegister(){
+  var name  = document.getElementById('rname').value.trim();
+  var email = document.getElementById('remail').value.trim();
+  var phone = document.getElementById('rphone').value.trim();
+  var ageEl = document.querySelector('input[name="ac"]:checked');
+  hideErr();
+
+  if(!name)  { showErr('Please enter your full name.'); return; }
+  if(!email) { showErr('Please enter your email address.'); return; }
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ showErr('Please enter a valid email address.'); return; }
+  if(!phone) { showErr('Please enter your contact number.'); return; }
+  if(!ageEl) { showErr('Please select your age category.'); return; }
+  if(!window.Razorpay){ showErr('Secure payment could not load. Please refresh the page and try again.'); return; }
+
+  var category = ageEl.value;
+  setBusy(true);
+  setLoading(true, 'Preparing your secure ₹99 payment…');
+
+  try {
+    var order = await postJson('/.netlify/functions/create-order', {
+      name:name, email:email, phone:phone, category:category
+    });
+    setLoading(false);
+
+    var options = {
+      key: order.keyId,
+      amount: order.amount,
+      currency: order.currency,
+      name: 'Thryve Pulse',
+      description: 'Thryve Pulse Assessment',
+      order_id: order.orderId,
+      prefill: {name:name, email:email, contact:phone},
+      notes: {product:'Thryve Pulse Assessment'},
+      theme: {color:'#2D6A4F'},
+      handler: async function(paymentResponse){
+        setLoading(true, 'Verifying your payment and preparing your assessment link…');
+        try {
+          var verified = await postJson('/.netlify/functions/verify-payment', {
+            razorpay_payment_id: paymentResponse.razorpay_payment_id,
+            razorpay_order_id: paymentResponse.razorpay_order_id,
+            razorpay_signature: paymentResponse.razorpay_signature
+          });
+          showPaidSuccess(verified.email || email);
+        } catch(err) {
+          setLoading(false);
+          setBusy(false);
+          showErr(err.message || 'We could not verify the payment yet. If money was deducted, please contact support before paying again.');
+        }
+      },
+      modal: {
+        ondismiss: function(){
+          setLoading(false);
+          setBusy(false);
+        },
+        escape: true,
+        confirm_close: true
+      }
+    };
+
+    var checkout = new Razorpay(options);
+    checkout.on('payment.failed', function(response){
+      setLoading(false);
+      setBusy(false);
+      var message = response && response.error && response.error.description;
+      showErr(message || 'Payment was not completed. Please try again.');
+    });
+    checkout.open();
+  } catch(err) {
+    setLoading(false);
+    setBusy(false);
+    showErr(err.message || 'Unable to start payment. Please try again.');
+  }
+}
+
+function resetForm(){
+  ['rname','remail','rphone'].forEach(function(id){
+    document.getElementById(id).value = '';
+  });
+  document.querySelectorAll('input[name="ac"]').forEach(function(r){ r.checked = false; });
+  hideErr();
+  setBusy(false);
+  showS('s-reg');
+}
+</script>
+</body>
+</html>
