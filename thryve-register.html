@@ -294,7 +294,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--text);
 <script>
 // Thryve Pulse paid registration — ₹99. Razorpay secrets remain on Netlify.
 var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxXU5hnn9pBB9OqMDwZc9PhkytMkavsXJ49bCmZ1TH1sj3KGnszX7W14mVijMPJmCcm/exec';
-var ASSESS_URL = 'https://thryvemeeraki.github.io/thryvepulse2.o/thryve-assessment.html';
+var ASSESS_URL = 'https://thryvepulse02.netlify.app/thryve-assessment.html';
 var PRICE_LABEL = '₹99';
 
 function showS(id){
@@ -361,7 +361,7 @@ async function handleRegister(){
   setLoading(true, 'Preparing your secure ₹99 payment…');
 
   try {
-    var order = await postJson('https://thryvepulse2.netlify.app/.netlify/functions/create-order', {
+    var order = await postJson('https://thryvepulse02.netlify.app/.netlify/functions/create-order', {
       name:name, email:email, phone:phone, category:category
     });
     setLoading(false);
@@ -379,7 +379,7 @@ async function handleRegister(){
       handler: async function(paymentResponse){
         setLoading(true, 'Verifying your payment and preparing your assessment link…');
         try {
-          var verified = await postJson('https://thryvepulse2.netlify.app/.netlify/functions/verify-payment', {
+          var verified = await postJson('https://thryvepulse02.netlify.app/.netlify/functions/verify-payment', {
             razorpay_payment_id: paymentResponse.razorpay_payment_id,
             razorpay_order_id: paymentResponse.razorpay_order_id,
             razorpay_signature: paymentResponse.razorpay_signature
@@ -426,7 +426,7 @@ async function handleCashCoupon(){
   setBusy(true);
   setLoading(true, 'Verifying your cash coupon and preparing your assessment link…');
   try {
-    var result = await postJson('https://thryvepulse2.netlify.app/.netlify/functions/redeem-coupon', {
+    var result = await postJson('https://thryvepulse02.netlify.app/.netlify/functions/redeem-coupon', {
       name:details.name, email:details.email, phone:details.phone,
       category:details.category, couponCode:couponCode
     });
